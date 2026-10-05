@@ -1,14 +1,13 @@
 # rke2-airgap-lifecycle-manager
 
-A Go-based automation tool that manages the full lifecycle of an RKE2 cluster in air-gap environments — from fresh install through ongoing upgrades. It orchestrates version detection, ISO handling, installer execution, token exchange, and Helm reconciliation through Kubernetes.
+A Go CLI for RKE2 lifecycle automation in air-gapped environments (Ubuntu): version detection, hardware/software preflight checks, ISO lifecycle handling, post-upgrade health monitoring.
+Status: work in progress. Published so far: TLS/preflight validation, config loading, Kubernetes helpers. Upgrade and install flows are in development and not yet in this repository.
 
 ---
 
 ## Why this tool exists
 
-Air-gap RKE2 clusters require a multi-step, error-prone process: tearing down and reinstalling RKE2, downloading an OS ISO, writing a platform answers file into a PVC, exchanging a one-time access code for a JWT, and triggering a Helm-based reconciliation loop — all before a single application pod starts.
-
-During install, several pods failed to start because the object-storage access secret is written with bootstrap placeholder credentials, and dependent pods crash before the real credentials are available. This tool automates the full flow end-to-end, including the secret-patch workaround that unblocks those pods.
+Air-gap RKE2 clusters require a multi-step, error-prone process and cannot handle errors, so tool verifies the hardware and software before there would be any manupulations provided with the server.
 
 ---
 
@@ -16,14 +15,10 @@ During install, several pods failed to start because the object-storage access s
 
 - Detects current versions: platform OS build, Helm operator, RKE2, and airgap ISO
 - Queries an artifact repository and OCI registry to find the latest available builds
-- Generates the platform configuration answers file with profile-aware storage sizing
 - Validates TLS certificate and key pair: expiry, FQDN/SAN match, public-key consistency
 - Manages the full install sequence: RKE2, kubectl, Helm, local-path-provisioner, system tools
 - Handles ISO lifecycle: disk-space pre-flight, cleanup of superseded ISOs, unmount of stale loop mounts, download with progress, integrity check
-- Writes configuration into the setup PVC via `sudo tee` (PVC directory is root-owned at write time)
-- Exchanges a one-time access code from setup-pod logs for a JWT
 - Triggers upgrade via the platform's internal state-machine API
-- Patches the object-storage access secret once real credentials appear, then restarts affected pods
 - Rebuilds the in-cluster Helm chart index after a new ISO is mounted (airgap upgrade)
 - Patches the `HelmRepository` CR URL to point at the new chart index
 - Surfaces TLS cert expiry and pod health on every run
@@ -42,11 +37,8 @@ internal/
   version/        current version detection (OS, Helm, RKE2, ISO)
   latest/         latest version discovery (Artifactory + Docker Hub OCI)
   airgap/         ISO lifecycle: download, mount, unmount, cleanup
-  installer/      installer download and execution
   kube/           Kubernetes interactions (nodes, pods, secrets, CRs)
-  responses/      platform answers-file generation and PVC write
   certcheck/      TLS certificate validation
-  token/          access-code scraping, token exchange, upgrade trigger
 docs/
   notes.md        engineering notes and manual command reference
 ```
@@ -143,4 +135,3 @@ Monitor pod health
 - All sensitive URLs, registry paths, namespaces, and credential values have been removed and replaced with `<placeholders>`.
 - This repository contains only generic logic suitable for demonstration and portfolio purposes.
 - The tool is designed for air-gap environments and assumes restricted or zero external network access.
-- `InsecureSkipVerify` is used for internal cluster HTTPS calls; edge nodes commonly use self-signed certificates.
