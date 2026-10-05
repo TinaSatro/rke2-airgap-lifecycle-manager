@@ -6,7 +6,7 @@ import (
 )
 
 func usage() {
-	fmt.Fprintf(os.Stderr, `rke2-airgap-lifecycle-manager — install
+	fmt.Fprintf(os.Stderr, `rke2-airgap-lifecycle-manager — install flow (work in progress)
 
 Provisions a new RKE2 cluster and deploys the platform.
 

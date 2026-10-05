@@ -43,7 +43,6 @@ func WaitAndFixSecrets(namespace, storageUserSecret, bootstrapSecret string, dep
 	if err != nil {
 		return fmt.Errorf("cannot read storage credentials: %w", err)
 	}
-	fmt.Printf("  access key : %s\n", accessKey)
 	fmt.Printf("  endpoint   : %s\n", endpoint)
 
 	if err := patchBootstrapSecret(namespace, bootstrapSecret, accessKey, secretKey, endpoint); err != nil {
