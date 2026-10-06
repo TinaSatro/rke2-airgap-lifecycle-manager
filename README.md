@@ -91,12 +91,6 @@ Install RKE2  →  kubectl  →  Helm  →  local-path-provisioner  →  tools
 
 Download installer  [+  airgap ISO if air-gap mode]
 
-Run installer  →  write responses to PVC
-
-Access code (from setup-pod logs)  →  JWT  →  trigger Helm reconciliation
-
-Wait for storage-user secret  →  patch object-storage secret  →  restart pods
-
 [rke2 ingress mode]  →  apply ingress bridge Service
 ```
 
@@ -111,10 +105,7 @@ Query latest versions    (Artifactory folders + Docker Hub OCI tags)
 Present diff, ask operator which components to upgrade
 
 [online path]
-  Patch platformResponses.json with new Helm version
-  Download installer  →  run -b (batch)
-  Access code  →  JWT  →  trigger reconciliation
-  helm upgrade <operator> oci://...
+  check - download - apply - verify
 
 [airgap path]
   Disk-space pre-flight  →  delete stale ISOs if needed
